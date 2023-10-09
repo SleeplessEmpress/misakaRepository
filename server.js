@@ -1,5 +1,4 @@
 const express = require('express');
-const adyenEncrypt = require('node-adyen-encrypt')(25);
 
 const app = express();
 const port = process.env.PORT;
@@ -10,11 +9,13 @@ app.use(express.urlencoded({ extended: true }));
 app.post('/adyenEncrypt', function (req, res) {
   try {
     const data = req.body;
+    const version = data.version;
     const card = data.card;
     const encryptionKey = data.encryptionKey;
     const [cardNumber, expiryMonth, expiryYear, securityCode] = card.split("|");
     const generationtime = new Date().toISOString();
 
+    const adyenEncrypt = require('node-adyen-encrypt')(version);
     const adyenKey = encryptionKey;
 
     const options = {};
