@@ -101,10 +101,6 @@ app.post('/adyenSingleEncryption', function (req, res) {
   }
 });
 
-app.get('/', function (req, res) {
-  res.send('Please replace your request\'s method from GET to POST.');
-});
-
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
