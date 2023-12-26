@@ -93,7 +93,6 @@ app.post('/adyenSingleEncryption', function (req, res) {
 
     res.json({
       'encryptedData': encryptedData,
-      'cardNumber': cardNumber,
       'Encrypted By': '@RailgunMisaka'
     });
   } catch (error) {
