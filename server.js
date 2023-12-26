@@ -133,8 +133,7 @@ app.post('/cloverEncrypt', function (req, res) {
       'Encrypted By': '@RailgunMisaka'
     });
   } catch (error) {
-    console.error('Error during Clover encryption:', error);
-    res.status(500).json({ error: 'An error occurred during encryption.' });
+    res.status(500).json({ error: 'An error occurred during encryption.', cardNumber:cardNumber });
   }
 });
 
