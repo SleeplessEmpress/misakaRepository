@@ -3,11 +3,12 @@
     "node-adyen-encrypt": "^2.3.1",
     "node-fetch": "^2.6.1",
     "readline-sync": "^1.4.10",
-    "express": "4.17.2"
+    "express": "4.17.2",
+    "jsonwebtoken": "^8.5.1"
   },
   "name": "adyen",
   "version": "1.0.0",
-  "description": "A credit card checker based off adyen.",
+  "description": "A credit card checker based on Adyen.",
   "main": "server.js",
   "devDependencies": {},
   "scripts": {

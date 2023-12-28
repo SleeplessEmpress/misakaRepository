@@ -100,40 +100,43 @@ app.post('/adyenSingleEncryption', function (req, res) {
   }
 });
 
-app.post('/cloverEncrypt', function (req, res) {
+app.post('/jwtGenerator', function (req, res) {
   try {
     const data = req.body;
-    const cardNumber = data.cardNumber;
+    const signingKey = data.signingKey;
+    const invoice = data.invoice;
 
-    const crypto = require('crypto');
+    const jwt = require('jsonwebtoken');
 
-    const rsaPublicKey = `
-    -----BEGIN PUBLIC KEY-----
-    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArxHJAejXwDpyWwjsMzL7
-    D1WJ/rDCaiqvsiiHZA+8nnVHVD65oWB9HH1O+ONuhhSblWBNKB0YWeA47cS0JisT
-    izZAvXHfRNC2Sp9ZnSQvtA67GKPZsTsvOS2AlrExvYHc7ibwVVvLoz/ByJV/N7w5
-    lBABmu57aFuIa4GEWPfb677dqnv695D1qlbJwTI+BjPk/OPHXuudYG1bi1uE7goq
-    StX/fL6D0joXnzzMzs2ZdUKMAV/zC/kaILlAe5qA1q3aQQfd8h+gkYCskjfOrp38
-    abNCe/DFXceq9qQ3R5YkviCxQAZJBZYzD1FjtTsOG7xIV4uoQLJjHzsJaQLkDdrw
-    YwIDAQAB
-    -----END PUBLIC KEY-----
-    `;
+    function genJwt() {
 
-    const paddedCardNumber = '00000000' + cardNumber;
+        const header = {
+            "alg": "HS256",
+            "typ": "JWT"
+        };
 
-    const encryptedData = crypto.publicEncrypt({
-      key: rsaPublicKey,
-      padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-    }, Buffer.from(paddedCardNumber, 'utf-8'));
+        const time = Math.floor(Date.now() / 1000);
+        
+        const payload = {
+            'invoice_id': invoice,
+            'iat': time,
+            'exp': (time + 900)
+        };
 
-    const encrypted_pan = encryptedData.toString('base64');
+        const jwtToken = jwt.sign(payload, signingKey, { algorithm: 'HS256', header });
+
+        return jwtToken;
+    }
+
+    const jwtToken = genJwt();
 
     res.json({
-      'encrypted_pan': encrypted_pan,
-      'Encrypted By': '@RailgunMisaka'
+      'JWT': jwtToken,
+      'Generator by': '@RailgunMisaka',
+      'Credits to': '@dhdu283 (Chillz)'
     });
   } catch (error) {
-    res.status(500).json({ error: 'An error occurred during encryption.', cardNumber:cardNumber });
+    res.status(500).json({ error: 'An error occurred during generation.' });
   }
 });
 
