@@ -155,14 +155,14 @@ app.post('/fastRecaptcha', function (req, res) {
 
     const createTaskOptions = {
       method: 'GET',
-      url: `https://fast-recaptcha-${selectedVersion}-solver.p.rapidapi.com/in.php`,
+      url: `https://fast-recaptcha-${version}-solver.p.rapidapi.com/in.php`,
       qs: {
         sitekey: sitekey,
         pageurl: pageurl
       },
       headers: {
         'X-RapidAPI-Key': key,
-        'X-RapidAPI-Host': `fast-recaptcha-${selectedVersion}-solver.p.rapidapi.com`
+        'X-RapidAPI-Host': `fast-recaptcha-${version}-solver.p.rapidapi.com`
       }
     };
 
@@ -172,13 +172,13 @@ app.post('/fastRecaptcha', function (req, res) {
 
       const getTaskResultOptions = {
         method: 'GET',
-        url: `https://fast-recaptcha-${selectedVersion}-solver.p.rapidapi.com/res.php`,
+        url: `https://fast-recaptcha-${version}-solver.p.rapidapi.com/res.php`,
         qs: {
           id: taskId
         },
         headers: {
           'X-RapidAPI-Key': key,
-          'X-RapidAPI-Host': `fast-recaptcha-${selectedVersion}-solver.p.rapidapi.com`
+          'X-RapidAPI-Host': `fast-recaptcha-${version}-solver.p.rapidapi.com`
         }
       };
 
