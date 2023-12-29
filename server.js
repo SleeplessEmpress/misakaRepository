@@ -150,6 +150,8 @@ app.post('/recaptchaV2', function (req, res) {
     const request = require('request');
 
     let gRecaptchaResponse;
+    let retryCount = 0;
+    const maxRetries = 100;
 
     const createTaskOptions = {
       method: 'GET',
@@ -182,8 +184,15 @@ app.post('/recaptchaV2', function (req, res) {
 
       function getTaskResult() {
         request(getTaskResultOptions, function (getTaskResultError, getTaskResultResponse, getTaskResultBody) {
-          if (getTaskResultBody.trim() === 'CAPCHA_NOT_READY') {
+          if (getTaskResultBody.trim() === 'CAPCHA_NOT_READY' && retryCount < maxRetries) {
+            retryCount++;
             setTimeout(getTaskResult, 1000);
+          } else if (getTaskResultBody.trim() === 'CAPCHA_NOT_READY') {
+            res.json({
+              'result': 'failure',
+              'message': 'Cannot solve reCAPTCHA within the maximum retry limit.',
+              'Compiled by': '@RailgunMisaka'
+            });
           } else {
             gRecaptchaResponse = getTaskResultBody.replace(/^OK\|/, '');
 
