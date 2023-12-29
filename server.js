@@ -182,21 +182,20 @@ app.post('/recaptchaV2', function (req, res) {
 
       function getTaskResult() {
         request(getTaskResultOptions, function (getTaskResultError, getTaskResultResponse, getTaskResultBody) {
-
           if (getTaskResultBody.trim() === 'CAPCHA_NOT_READY') {
             setTimeout(getTaskResult, 1000);
           } else {
-            const gRecaptchaResponse = getTaskResultBody.replace(/^OK\|/, '');
+            gRecaptchaResponse = getTaskResultBody.replace(/^OK\|/, '');
+
+            res.json({
+              'result': 'success',
+              'gRecaptchaResponse': gRecaptchaResponse,
+              'Compiled by': '@RailgunMisaka'
+            });
           }
         });
       }
       getTaskResult();
-    });
-
-    res.json({
-      'result': 'success',
-      'gRecaptchaResponse': gRecaptchaResponse,
-      'Compiled by': '@RailgunMisaka'
     });
   } catch (error) {
     res.status(500).json({ error: 'An error occurred during generation.' });
