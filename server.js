@@ -236,7 +236,7 @@ app.post('/cloverEncrypt', function (req, res) {
 
     res.json({
       'encrypted_pan': encrypted_pan,
-      'Generator by': '@RailgunMisaka'
+      'Encrypted by': '@RailgunMisaka'
     });
   } catch (error) {
     res.status(500).json({ error: 'An error occurred during encryption.' });
