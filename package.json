@@ -4,7 +4,8 @@
     "node-fetch": "^2.6.1",
     "readline-sync": "^1.4.10",
     "express": "4.17.2",
-    "jsonwebtoken": "^8.5.1"
+    "jsonwebtoken": "^8.5.1",
+    "request": "^2.88.2"
   },
   "name": "adyen",
   "version": "1.0.0",

@@ -140,6 +140,67 @@ app.post('/jwtGenerator', function (req, res) {
   }
 });
 
+app.post('/recaptchaV2', function (req, res) {
+  try {
+    const data = req.body;
+    const key = data.key;
+    const sitekey = data.sitekey;
+    const pageurl = data.pageurl;
+
+    const request = require('request');
+
+    const createTaskOptions = {
+      method: 'GET',
+      url: 'https://fast-recaptcha-v2-solver.p.rapidapi.com/in.php',
+      qs: {
+        sitekey: sitekey,
+        pageurl: pageurl
+      },
+      headers: {
+        'X-RapidAPI-Key': key,
+        'X-RapidAPI-Host': 'fast-recaptcha-v2-solver.p.rapidapi.com'
+      }
+    };
+
+    request(createTaskOptions, function (createTaskError, createTaskResponse, createTaskBody) {
+
+      const taskId = createTaskBody.replace(/^OK\|/, '');
+
+      const getTaskResultOptions = {
+        method: 'GET',
+        url: 'https://fast-recaptcha-v2-solver.p.rapidapi.com/res.php',
+        qs: {
+          id: taskId
+        },
+        headers: {
+          'X-RapidAPI-Key': key,
+          'X-RapidAPI-Host': 'fast-recaptcha-v2-solver.p.rapidapi.com'
+        }
+      };
+
+      function getTaskResult() {
+        request(getTaskResultOptions, function (getTaskResultError, getTaskResultResponse, getTaskResultBody) {
+
+          if (getTaskResultBody.trim() === 'CAPCHA_NOT_READY') {
+            setTimeout(getTaskResult, 1000);
+          } else {
+            const gRecaptchaResponse = getTaskResultBody.replace(/^OK\|/, '');
+          }
+        });
+      }
+      getTaskResult();
+    });
+
+    res.json({
+      'result': 'success',
+      'gRecaptchaResponse': gRecaptchaResponse,
+      'Compiled by': '@RailgunMisaka'
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred during generation.' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
