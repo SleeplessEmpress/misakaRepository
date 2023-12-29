@@ -140,29 +140,27 @@ app.post('/jwtGenerator', function (req, res) {
   }
 });
 
-app.post('/fastRecaptcha', function (req, res) {
+app.post('/recaptchaV2', function (req, res) {
   try {
     const data = req.body;
     const key = data.key;
-    const version = data.version;
     const sitekey = data.sitekey;
     const pageurl = data.pageurl;
 
     const request = require('request');
 
-    let retryCount = 0;
     let gRecaptchaResponse;
 
     const createTaskOptions = {
       method: 'GET',
-      url: `https://fast-recaptcha-${version}-solver.p.rapidapi.com/in.php`,
+      url: 'https://fast-recaptcha-v2-solver.p.rapidapi.com/in.php',
       qs: {
         sitekey: sitekey,
         pageurl: pageurl
       },
       headers: {
         'X-RapidAPI-Key': key,
-        'X-RapidAPI-Host': `fast-recaptcha-${version}-solver.p.rapidapi.com`
+        'X-RapidAPI-Host': 'fast-recaptcha-v2-solver.p.rapidapi.com'
       }
     };
 
@@ -172,29 +170,23 @@ app.post('/fastRecaptcha', function (req, res) {
 
       const getTaskResultOptions = {
         method: 'GET',
-        url: `https://fast-recaptcha-${version}-solver.p.rapidapi.com/res.php`,
+        url: 'https://fast-recaptcha-v2-solver.p.rapidapi.com/res.php',
         qs: {
           id: taskId
         },
         headers: {
           'X-RapidAPI-Key': key,
-          'X-RapidAPI-Host': `fast-recaptcha-${version}-solver.p.rapidapi.com`
+          'X-RapidAPI-Host': 'fast-recaptcha-v2-solver.p.rapidapi.com'
         }
       };
 
       function getTaskResult() {
         request(getTaskResultOptions, function (getTaskResultError, getTaskResultResponse, getTaskResultBody) {
-          if (getTaskResultBody.trim() === 'CAPCHA_NOT_READY' && retryCount < 100) {
-            retryCount++;
-            setTimeout(checkTaskStatus, 1000);
-          } else if (getTaskResultBody.trim() === 'CAPCHA_NOT_READY') {
-            res.json({
-              'result': 'failure',
-              'message': 'Cannot solve reCAPTCHA.',
-              'Compiled by': '@RailgunMisaka'
-            });
+          if (getTaskResultBody.trim() === 'CAPCHA_NOT_READY') {
+            setTimeout(getTaskResult, 1000);
           } else {
             gRecaptchaResponse = getTaskResultBody.replace(/^OK\|/, '');
+
             res.json({
               'result': 'success',
               'gRecaptchaResponse': gRecaptchaResponse,
@@ -206,7 +198,7 @@ app.post('/fastRecaptcha', function (req, res) {
       getTaskResult();
     });
   } catch (error) {
-    res.status(500).json({ error: 'An error occurred during operation.' });
+    res.status(500).json({ error: 'An error occurred during generation.' });
   }
 });
 
