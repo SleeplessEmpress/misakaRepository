@@ -149,6 +149,8 @@ app.post('/recaptchaV2', function (req, res) {
 
     const request = require('request');
 
+    let gRecaptchaResponse;
+
     const createTaskOptions = {
       method: 'GET',
       url: 'https://fast-recaptcha-v2-solver.p.rapidapi.com/in.php',
