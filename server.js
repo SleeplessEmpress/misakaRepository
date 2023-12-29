@@ -211,6 +211,38 @@ app.post('/recaptchaV2', function (req, res) {
   }
 });
 
+app.post('/cloverEncrypt', function (req, res) {
+  try {
+    const data = req.body;
+    const cardNumber = data.cardNumber;
+
+    const NodeRSA = require('node-rsa');
+
+    const rsaPublicKey = `-----BEGIN PUBLIC KEY-----
+    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArxHJAejXwDpyWwjsMzL7
+    D1WJ/rDCaiqvsiiHZA+8nnVHVD65oWB9HH1O+ONuhhSblWBNKB0YWeA47cS0JisT
+    izZAvXHfRNC2Sp9ZnSQvtA67GKPZsTsvOS2AlrExvYHc7ibwVVvLoz/ByJV/N7w5
+    lBABmu57aFuIa4GEWPfb677dqnv695D1qlbJwTI+BjPk/OPHXuudYG1bi1uE7goq
+    StX/fL6D0joXnzzMzs2ZdUKMAV/zC/kaILlAe5qA1q3aQQfd8h+gkYCskjfOrp38
+    abNCe/DFXceq9qQ3R5YkviCxQAZJBZYzD1FjtTsOG7xIV4uoQLJjHzsJaQLkDdrw
+    YwIDAQAB
+    -----END PUBLIC KEY-----`;
+
+    const key = new NodeRSA();
+    key.importKey(rsaPublicKey, 'pkcs8-public-pem');
+
+    const paddedCardNumber = '00000000' + cardNumber;
+    const encrypted_pan = key.encrypt(paddedCardNumber, 'base64');
+
+    res.json({
+      'encrypted_pan': encrypted_pan,
+      'Generator by': '@RailgunMisaka'
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred during encryption.' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
