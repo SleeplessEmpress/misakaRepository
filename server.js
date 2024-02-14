@@ -140,7 +140,7 @@ app.post('/jwtGenerator', function (req, res) {
   }
 });
 
-app.post('/v3', function (req, res) {
+app.post('/v3', async function (req, res) {
   try {
     const data = req.body;
     const key = data.key;
@@ -149,6 +149,8 @@ app.post('/v3', function (req, res) {
 
     const axios = require('axios');
     const querystring = require('querystring');
+
+    let gRecaptchaResponse;
 
     class RecapBypass {
       constructor(anchorUrl) {
@@ -164,7 +166,7 @@ app.post('/v3', function (req, res) {
         return result;
       }
 
-      async captchaBypass(siteKey = null) {
+      async captchaBypass(siteKey = "defaultSiteKey") {
         try {
           const r1 = await axios.get(this.anchorUrl);
           const matches = r1.data.match(/id="recaptcha-token"\s*value="(.*?)"/);
@@ -174,10 +176,6 @@ app.post('/v3', function (req, res) {
           }
 
           const anchorData = this.xformParser(this.anchorUrl.slice(this.anchorUrl.indexOf("/anchor?") + 8));
-
-          if (siteKey === null) {
-            siteKey = siteKey;
-          }
 
           const url = `https://www.google.com/recaptcha/api2/reload?k=${siteKey}`;
 
@@ -205,7 +203,7 @@ app.post('/v3', function (req, res) {
     }
 
     const recapBypass = new RecapBypass(anchorUrl);
-    const recapResult = await recapBypass.captchaBypass();
+    const recapResult = await recapBypass.captchaBypass(siteKey);
 
     gRecaptchaResponse = recapResult.token || null;
 
