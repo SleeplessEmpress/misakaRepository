@@ -140,74 +140,83 @@ app.post('/jwtGenerator', function (req, res) {
   }
 });
 
-app.post('/recaptchaV2', function (req, res) {
+app.post('/v3', function (req, res) {
   try {
     const data = req.body;
     const key = data.key;
-    const sitekey = data.sitekey;
-    const pageurl = data.pageurl;
+    const siteKey = data.siteKey;
+    const anchorUrl = data.anchorUrl;
 
-    const request = require('request');
+    const axios = require('axios');
+    const querystring = require('querystring');
 
-    let gRecaptchaResponse;
-    let retryCount = 0;
-    const maxRetries = 100;
-
-    const createTaskOptions = {
-      method: 'GET',
-      url: 'https://fast-recaptcha-v2-solver.p.rapidapi.com/in.php',
-      qs: {
-        sitekey: sitekey,
-        pageurl: pageurl
-      },
-      headers: {
-        'X-RapidAPI-Key': key,
-        'X-RapidAPI-Host': 'fast-recaptcha-v2-solver.p.rapidapi.com'
+    class RecapBypass {
+      constructor(anchorUrl) {
+        this.anchorUrl = anchorUrl;
       }
-    };
 
-    request(createTaskOptions, function (createTaskError, createTaskResponse, createTaskBody) {
-
-      const taskId = createTaskBody.replace(/^OK\|/, '');
-
-      const getTaskResultOptions = {
-        method: 'GET',
-        url: 'https://fast-recaptcha-v2-solver.p.rapidapi.com/res.php',
-        qs: {
-          id: taskId
-        },
-        headers: {
-          'X-RapidAPI-Key': key,
-          'X-RapidAPI-Host': 'fast-recaptcha-v2-solver.p.rapidapi.com'
-        }
-      };
-
-      function getTaskResult() {
-        request(getTaskResultOptions, function (getTaskResultError, getTaskResultResponse, getTaskResultBody) {
-          if (getTaskResultBody.trim() === 'CAPCHA_NOT_READY' && retryCount < maxRetries) {
-            retryCount++;
-            setTimeout(getTaskResult, 1000);
-          } else if (getTaskResultBody.trim() === 'CAPCHA_NOT_READY') {
-            res.json({
-              'result': 'failure',
-              'message': 'Cannot solve reCAPTCHA within the maximum retry limit.',
-              'Compiled by': '@RailgunMisaka'
-            });
-          } else {
-            gRecaptchaResponse = getTaskResultBody.replace(/^OK\|/, '');
-
-            res.json({
-              'result': 'success',
-              'gRecaptchaResponse': gRecaptchaResponse,
-              'Compiled by': '@RailgunMisaka'
-            });
-          }
+      xformParser(data) {
+        const result = {};
+        data.split('&').forEach(item => {
+          const [key, value] = item.split('=');
+          result[key] = decodeURIComponent(value);
         });
+        return result;
       }
-      getTaskResult();
+
+      async captchaBypass(siteKey = null) {
+        try {
+          const r1 = await axios.get(this.anchorUrl);
+          const matches = r1.data.match(/id="recaptcha-token"\s*value="(.*?)"/);
+
+          if (!matches) {
+            return { error: "Parse Token Error" };
+          }
+
+          const anchorData = this.xformParser(this.anchorUrl.slice(this.anchorUrl.indexOf("/anchor?") + 8));
+
+          if (siteKey === null) {
+            siteKey = siteKey;
+          }
+
+          const url = `https://www.google.com/recaptcha/api2/reload?k=${siteKey}`;
+
+          const data = {
+            ...anchorData,
+            reason: "q",
+            c: matches[1],
+            chr: "",
+            vh: "",
+            bg: ""
+          };
+
+          const options = {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          };
+
+          const response = await axios.post(url, querystring.stringify(data), options);
+
+          const token = response.data.split('"rresp","')[1].split('"')[0];
+          return { token };
+        } catch (error) {
+          return { error: "Error while parsing response" };
+        }
+      }
+    }
+
+    const recapBypass = new RecapBypass(anchorUrl);
+    recapBypass.captchaBypass()
+    .then(recapResult => {
+      const gRecaptchaResponse = recapResult.token || null;
+    });
+
+    res.json({
+      'gRecaptchaResponse': gRecaptchaResponse,
+      'Solver by': '@RailgunMisaka',
+      'Credits to': '@dhdu283 (Chillz)'
     });
   } catch (error) {
-    res.status(500).json({ error: 'An error occurred during generation.' });
+    res.status(500).json({ error: 'An error occurred during process.' });
   }
 });
 
