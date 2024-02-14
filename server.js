@@ -205,10 +205,9 @@ app.post('/v3', function (req, res) {
     }
 
     const recapBypass = new RecapBypass(anchorUrl);
-    recapBypass.captchaBypass()
-    .then(recapResult => {
-      const gRecaptchaResponse = recapResult.token || null;
-    });
+    const recapResult = await recapBypass.captchaBypass();
+
+    gRecaptchaResponse = recapResult.token || null;
 
     res.json({
       'gRecaptchaResponse': gRecaptchaResponse,
