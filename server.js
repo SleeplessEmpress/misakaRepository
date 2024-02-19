@@ -249,6 +249,56 @@ app.post('/cloverEncrypt', function (req, res) {
   }
 });
 
+app.post('/securepayEncrypt', function (req, res) {
+  try {
+    const data = req.body;
+    const n = data.n;
+    const cardNumber = data.cardNumber;
+    const cardSecurityCode = data.cardNumber;
+
+    const crypto = require('crypto');
+    const jwkToPem = require('jwk-to-pem');
+
+    const publicKeyJwk = {
+      kty: 'RSA',
+      n: n,
+      e: 'AQAB'
+    };
+
+    const cardNumber = cardNumber;
+    const cardSecurityCode = cardSecurityCode;
+
+    const encryptedCardNumber = crypto.publicEncrypt(
+    {
+      key: publicKeyPem,
+      padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+      oaepHash: "sha256",
+    },
+    Buffer.from(cardNumber)
+    );
+
+    const encryptedCardSecurityCode = crypto.publicEncrypt(
+    {
+      key: publicKeyPem,
+      padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+      oaepHash: "sha256",
+    },
+    Buffer.from(cardSecurityCode)
+    );
+
+    const instrument = 'EAAQ' + encryptedCardNumber.toString('base64');
+    const cvv = 'EAAQ' + encryptedCardSecurityCode.toString('base64');
+
+    res.json({
+      'instrument': instrument,
+      'cvv' : cvv,
+      'Encrypted by': '@RailgunMisaka'
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred during encryption.' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
