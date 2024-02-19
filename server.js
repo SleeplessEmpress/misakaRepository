@@ -265,8 +265,8 @@ app.post('/securepayEncrypt', function (req, res) {
       e: 'AQAB'
     };
 
-    const cardNumber = cardNumber;
-    const cardSecurityCode = cardSecurityCode;
+    const number = cardNumber;
+    const securityCode = cardSecurityCode;
 
     const encryptedCardNumber = crypto.publicEncrypt(
     {
@@ -274,7 +274,7 @@ app.post('/securepayEncrypt', function (req, res) {
       padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
       oaepHash: "sha256",
     },
-    Buffer.from(cardNumber)
+    Buffer.from(number)
     );
 
     const encryptedCardSecurityCode = crypto.publicEncrypt(
@@ -283,7 +283,7 @@ app.post('/securepayEncrypt', function (req, res) {
       padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
       oaepHash: "sha256",
     },
-    Buffer.from(cardSecurityCode)
+    Buffer.from(securityCode)
     );
 
     const instrument = 'EAAQ' + encryptedCardNumber.toString('base64');
