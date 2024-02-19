@@ -268,6 +268,8 @@ app.post('/securepayEncrypt', function (req, res) {
     const number = cardNumber;
     const securityCode = cardSecurityCode;
 
+    const publicKeyPem = jwkToPem(publicKeyJwk);
+
     const encryptedCardNumber = crypto.publicEncrypt(
     {
       key: publicKeyPem,
