@@ -254,7 +254,7 @@ app.post('/securepayEncrypt', function (req, res) {
     const data = req.body;
     const n = data.n;
     const cardNumber = data.cardNumber;
-    const cardSecurityCode = data.cardNumber;
+    const cardSecurityCode = data.cardSecurityCode;
 
     const crypto = require('crypto');
     const jwkToPem = require('jwk-to-pem');
@@ -265,8 +265,8 @@ app.post('/securepayEncrypt', function (req, res) {
       e: 'AQAB'
     };
 
-    const number = cardNumber;
-    const securityCode = cardSecurityCode;
+    const cardNumber = cardNumber;
+    const cardSecurityCode = cardSecurityCode;
 
     const encryptedCardNumber = crypto.publicEncrypt(
     {
@@ -274,7 +274,7 @@ app.post('/securepayEncrypt', function (req, res) {
       padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
       oaepHash: "sha256",
     },
-    Buffer.from(number)
+    Buffer.from(cardNumber)
     );
 
     const encryptedCardSecurityCode = crypto.publicEncrypt(
@@ -283,7 +283,7 @@ app.post('/securepayEncrypt', function (req, res) {
       padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
       oaepHash: "sha256",
     },
-    Buffer.from(securityCode)
+    Buffer.from(cardSecurityCode)
     );
 
     const instrument = 'EAAQ' + encryptedCardNumber.toString('base64');
