@@ -252,7 +252,7 @@ app.post('/cloverEncrypt', function (req, res) {
 app.post('/securepayEncrypt', function (req, res) {
   try {
     const data = req.body;
-    const n = data.n;
+    const publicKeyModulus = data.publicKeyModulus;
     const cardNumber = data.cardNumber;
     const cardSecurityCode = data.cardSecurityCode;
 
@@ -261,7 +261,7 @@ app.post('/securepayEncrypt', function (req, res) {
 
     const publicKeyJwk = {
       kty: 'RSA',
-      n: n,
+      n: publicKeyModulus,
       e: 'AQAB'
     };
 
