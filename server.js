@@ -297,7 +297,8 @@ app.post('/securepayEncrypt', function (req, res) {
       'Encrypted by': '@RailgunMisaka'
     });
   } catch (error) {
-    res.status(500).json({ error: 'An error occurred during encryption.' });
+    console.error('Encryption error:', error);
+    res.status(500).json({ error: 'An error occurred during encryption.', details: error.message });
   }
 });
 
