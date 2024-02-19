@@ -288,8 +288,8 @@ app.post('/securepayEncrypt', function (req, res) {
     Buffer.from(securityCode)
     );
 
-    const instrument = encryptedCardNumber.toString('base64');
-    const cvv = encryptedCardSecurityCode.toString('base64');
+    const instrument = 'EAAQ' + encryptedCardNumber.toString('base64');
+    const cvv = 'EAAQ' + encryptedCardSecurityCode.toString('base64');
 
     res.json({
       'instrument': instrument,
