@@ -252,48 +252,35 @@ app.post('/cloverEncrypt', function (req, res) {
 app.post('/securepayEncrypt', function (req, res) {
   try {
     const data = req.body;
-    const publicKeyModulus = data.publicKeyModulus;
     const cardNumber = data.cardNumber;
     const cardSecurityCode = data.cardSecurityCode;
 
-    const crypto = require('crypto');
-    const jwkToPem = require('jwk-to-pem');
+    const NodeRSA = require('node-rsa');
 
-    const publicKeyJwk = {
-      kty: 'RSA',
-      n: publicKeyModulus,
-      e: 'AQAB'
-    };
+    const rsaPublicKey = `-----BEGIN PUBLIC KEY-----
+    MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA24gKlX5n/yeOKYOyAQ4L
+    CiZtzWrhU3SoHfHBVEYufsMvSA/BQ8M985Foj+LWuM3NleRJVTPptfaVS8Oryr5R
+    YlNYxOtUcUw5MeVBbkSRr8k56NY4mN7XTAPHwvol2ZeFUWhPJrzEmvN+eiU1TXJF
+    1lqe0CDoYILjb5oAcGzjiPyfUsxYokCR7AWytdIrqjmqqN9QoBiB1QdpABCEwmBF
+    h5owOhOrm8l/V9KGScd0+hAXYr+uJrGqh12EUhmc5AL5jZPxtYvdTmutVZOwXhfN
+    C1ywIjdsGBnsCKPRlcUunf/J+NbRiPKVepsTGFbu7QrurSmXN/+moBZ/unG4WQSp
+    k0RDoFazf7L0X2bIyL1vj7HT3x+IB0F6nKCLiKeUBncxFgbgit2TGEf5IbscFMVM
+    CscTQBjh4F/zUw1d1u2DKAvXsrylhk2D3X9T4NM6Bypb+zU0mKVXMv+gMaoYEknO
+    m/prohDvY1idfkf0cqhlkEkV7Fe6cV4MxHxuR0ig3yvHjEu5BvO1Slhtc/uumZvH
+    KfhC/4dR4ZN5gl/Zqrj8M157fSQP4juvBx/iKThDTSc9a6tW9B9AesY+imV2zxLN
+    NbFSrA9E6OXqEJweLSOa+ulJi/Tzs9LtYgg5l3WvuiR2FF5dI8c5JQsMEnrsDwp4
+    hzBCevkp7JbUU+b25ZhSa6UCAwEAAQ==
+    -----END PUBLIC KEY-----`;
 
-    const number = cardNumber;
-    const securityCode = cardSecurityCode;
+    const key = new NodeRSA();
+    key.importKey(rsaPublicKey, 'pkcs8-public-pem');
 
-    const publicKeyPem = jwkToPem(publicKeyJwk);
-
-    const encryptedCardNumber = crypto.publicEncrypt(
-    {
-      key: publicKeyPem,
-      padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-      oaepHash: "sha256",
-    },
-    Buffer.from(number)
-    );
-
-    const encryptedCardSecurityCode = crypto.publicEncrypt(
-    {
-      key: publicKeyPem,
-      padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-      oaepHash: "sha256",
-    },
-    Buffer.from(securityCode)
-    );
-
-    const instrument = 'EAAQ' + encryptedCardNumber.toString('base64');
-    const cvv = 'EAAQ' + encryptedCardSecurityCode.toString('base64');
+    const instrument = 'EAAQ' + key.encrypt(cardNumber, 'base64');
+    const cvv = 'EAAQ' + key.encrypt(cardSecurityCode, 'base64');
 
     res.json({
       'instrument': instrument,
-      'cvv' : cvv,
+      'cvv': cvv,
       'Encrypted by': '@RailgunMisaka'
     });
   } catch (error) {
