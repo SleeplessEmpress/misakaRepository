@@ -7,7 +7,8 @@
     "jsonwebtoken": "^8.5.1",
     "request": "^2.88.2",
     "node-rsa": "^1.1.1",
-    "axios": "^0.24.0"
+    "axios": "^0.24.0",
+    "puppeteer": "^13.0.0"
   },
   "name": "adyen",
   "version": "1.0.0",

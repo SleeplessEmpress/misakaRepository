@@ -288,6 +288,44 @@ app.post('/securepayEncrypt', function (req, res) {
   }
 });
 
+app.post('/ewayEncrypt', function (req, res) {
+  try {
+    const data = req.body;
+    const ewayKey = data.ewayKey;
+    const cardNumber = data.cardNumber;
+    const cardSecurityCode = data.cardSecurityCode;
+
+    const puppeteer = require('puppeteer');
+
+    (async () => {
+      const browser = await puppeteer.launch();
+      const page = await browser.newPage();
+
+      await page.goto('about:blank');
+
+      await page.addScriptTag({url: 'https://secure.ewaypayments.com/scripts/eCrypt.min.js'});
+
+      const encryptedCardNumber = await page.evaluate((cardNumber, encryptionKey) => {
+        return eCrypt.encryptValue(cardNumber, encryptionKey);
+      }, cardNumber, encryptionKey);
+
+      const encryptedCardSecurityCode = await page.evaluate((cardSecurityCode, encryptionKey) => {
+        return eCrypt.encryptValue(cardSecurityCode, encryptionKey);
+      }, cardSecurityCode, encryptionKey);
+
+      await browser.close();
+    })();
+
+    res.json({
+      'encryptedCardNumber': encryptedCardNumber,
+      'encryptedCardSecurityCode': encryptedCardNumber,
+      'Encrypted by': '@RailgunMisaka'
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred during encryption.' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
