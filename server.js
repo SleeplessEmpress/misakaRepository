@@ -296,6 +296,15 @@ app.post('/cardConnectEncrypt', function (req, res) {
 
     const NodeRSA = require('node-rsa');
 
+    function formatPublicKey(key) {
+    const header = "-----BEGIN PUBLIC KEY-----\n";
+    const footer = "\n-----END PUBLIC KEY-----";
+    const formattedKeyBody = key.match(/.{1,64}/g).join('\n');
+    return header + formattedKeyBody + footer;
+    }
+
+    const originalKey = formatPublicKey(rsaPublicKey);
+
     const key = new NodeRSA();
     key.importKey(rsaPublicKey, 'pkcs8-public-pem');
 
