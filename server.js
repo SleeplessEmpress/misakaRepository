@@ -306,7 +306,7 @@ app.post('/cardConnectEncrypt', function (req, res) {
     const originalKey = formatPublicKey(rsaPublicKey);
 
     const key = new NodeRSA();
-    key.importKey(rsaPublicKey, 'pkcs8-public-pem');
+    key.importKey(originalKey, 'pkcs8-public-pem');
 
     const encryptedData = key.encrypt(cardNumber, 'base64');
 
