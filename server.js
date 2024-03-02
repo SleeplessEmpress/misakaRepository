@@ -288,39 +288,21 @@ app.post('/securepayEncrypt', function (req, res) {
   }
 });
 
-app.post('/ewayEncrypt', function (req, res) {
+app.post('/cardConnectEncrypt', function (req, res) {
   try {
     const data = req.body;
-    const ewayKey = data.ewayKey;
+    const rsaPublicKey = data.rsaPublicKey;
     const cardNumber = data.cardNumber;
-    const cardSecurityCode = data.cardSecurityCode;
 
-    const puppeteer = require('puppeteer');
+    const NodeRSA = require('node-rsa');
 
-    (async () => {
-      const browser = await puppeteer.launch({
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });
-      const page = await browser.newPage();
+    const key = new NodeRSA();
+    key.importKey(rsaPublicKey, 'pkcs8-public-pem');
 
-      await page.goto('about:blank');
-
-      await page.addScriptTag({url: 'https://secure.ewaypayments.com/scripts/eCrypt.min.js'});
-
-      const encryptedCardNumber = await page.evaluate((cardNumber, encryptionKey) => {
-        return eCrypt.encryptValue(cardNumber, encryptionKey);
-      }, cardNumber, encryptionKey);
-
-      const encryptedCardSecurityCode = await page.evaluate((cardSecurityCode, encryptionKey) => {
-        return eCrypt.encryptValue(cardSecurityCode, encryptionKey);
-      }, cardSecurityCode, encryptionKey);
-
-      await browser.close();
-    })();
+    const encryptedData = key.encrypt(cardNumber, 'base64');
 
     res.json({
-      'encryptedCardNumber': encryptedCardNumber,
-      'encryptedCardSecurityCode': encryptedCardNumber,
+      'encryptedData': encryptedData,
       'Encrypted by': '@RailgunMisaka'
     });
   } catch (error) {
