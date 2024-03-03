@@ -288,6 +288,43 @@ app.post('/securepayEncrypt', function (req, res) {
   }
 });
 
+app.post('/encryptData', function (req, res) {
+  try {
+    const data = req.body;
+    const cardNumber = data.cardNumber;
+    const publicKey = data.publicKey;
+
+    const NodeRSA = require('node-rsa');
+
+    function formatPEM(publicKey) {
+      const PEMHeader = "-----BEGIN PUBLIC KEY-----\n";
+      const PEMFooter = "\n-----END PUBLIC KEY-----";
+      const keyLength = publicKey.length;
+      let formattedKey = "";
+
+      for (let i = 0; i < keyLength; i += 64) {
+        formattedKey += publicKey.substring(i, Math.min(i + 64, keyLength)) + "\n";
+      }
+
+      return PEMHeader + formattedKey + PEMFooter;
+    }
+
+    const PEMKey = formatPEM(publicKey);
+
+    const key = new NodeRSA();
+    key.importKey(PEMKey, 'pkcs8-public-pem');
+
+    const encryptedData = key.encrypt(cardNumber, 'base64');
+
+    res.json({
+      'encryptedData': encryptedData,
+      'Encrypted by': '@RailgunMisaka'
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred during encryption.' });
+  }
+});
+
 app.post('/ewayEncrypt', function (req, res) {
   try {
     const data = req.body;
