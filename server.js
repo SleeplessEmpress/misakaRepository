@@ -292,36 +292,81 @@ app.post('/encryptData', function (req, res) {
   try {
     const data = req.body;
     const cardNumber = data.cardNumber;
+    const cardSecurityCode = data.cardSecurityCode;
     const publicKey = data.publicKey;
 
     const NodeRSA = require('node-rsa');
 
     function formatPEM(publicKey) {
+
       const PEMHeader = "-----BEGIN PUBLIC KEY-----\n";
       const PEMFooter = "\n-----END PUBLIC KEY-----";
       const keyLength = publicKey.length;
+      
       let formattedKey = "";
 
       for (let i = 0; i < keyLength; i += 64) {
         formattedKey += publicKey.substring(i, Math.min(i + 64, keyLength)) + "\n";
       }
-
       return PEMHeader + formattedKey + PEMFooter;
     }
 
-    const PEMKey = formatPEM(publicKey);
+    if (cardNumber && cardSecurityCode && publicKey) {
+      const PEMKey = formatPEM(publicKey);
 
-    const key = new NodeRSA();
-    key.importKey(PEMKey, 'pkcs8-public-pem');
+      const key = new NodeRSA();
+      key.importKey(PEMKey, 'pkcs8-public-pem');
 
-    const encryptedData = key.encrypt(cardNumber, 'base64');
+      const encryptedCardNumber = key.encrypt(cardNumber, 'base64');
+      const encryptedSecurityCode = key.encrypt(cardSecurityCode, 'base64');
 
-    res.json({
-      'encryptedData': encryptedData,
-      'Encrypted by': '@RailgunMisaka'
-    });
+      res.json({
+        "encryptedCardNumber": encryptedCardNumber,
+        "encryptedSecurityCode": encryptedSecurityCode,
+        "Encrypted by": "@RailgunMisaka"
+      });
+    } else if (cardNumber && publicKey) {
+      const PEMKey = formatPEM(publicKey);
+
+      const key = new NodeRSA();
+      key.importKey(PEMKey, 'pkcs8-public-pem');
+
+      const encryptedCardNumber = key.encrypt(cardNumber, 'base64');
+
+      res.json({
+        "encryptedCardNumber": encryptedCardNumber,
+        "Encrypted by": "@RailgunMisaka"
+      });
+    } else if (cardSecurityCode && publicKey) {
+      const PEMKey = formatPEM(publicKey);
+
+      const key = new NodeRSA();
+      key.importKey(PEMKey, 'pkcs8-public-pem');
+
+      const encryptedSecurityCode = key.encrypt(cardSecurityCode, 'base64');
+
+      res.json({
+        "encryptedSecurityCode": encryptedSecurityCode,
+        "Encrypted by": "@RailgunMisaka"
+      });
+    } else if (!cardNumber && !cardSecurityCode){
+      res.json({
+          "message": "Please fill the required field. Missing Card Number and Card Security Code.",
+          "Encrypted by": "@RailgunMisaka"
+        });
+    } else if (!publicKey) {
+      res.json({
+          "message": "Please fill the required field. Missing Public Key.",
+          "Encrypted by": "@RailgunMisaka"
+        });
+    } else {
+      res.json({
+          "message": "Failed durimh encryption.",
+          "Encrypted by": "@RailgunMisaka"
+        });
+    }
   } catch (error) {
-    res.status(500).json({ error: 'An error occurred during encryption.' });
+    res.status(500).json({ error: 'There was an error while processing your request' });
   }
 });
 
