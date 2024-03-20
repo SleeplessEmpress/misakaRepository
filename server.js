@@ -120,6 +120,43 @@ app.post('/adyenJWTEncrypt', function (req, res) {
   }
 });
 
+app.post('/cybersourceFlexV2', async function (req, res) {
+  try {
+    const data = req.body;
+    const card = data.card;
+    const capture_context = data.capture_context;
+    const [number, expiryMonth, expiryYear, cvc] = card.split("|");
+    const cardType = card[0];
+
+    const cyber = require('cs2-encryption');
+
+    const cardTypeMap = {
+        '3': cyber.CardTypes.AmericanExpress,
+        '4': cyber.CardTypes.Visa,
+        '5': cyber.CardTypes.MasterCard
+    };
+
+    const brand = cardTypeMap[cardType];
+
+    const cardData = {
+        number: number,
+        securityCode: cvc,
+        expirationMonth: expiryMonth,
+        expirationYear: expiryYear,
+        type: brand,
+    };
+
+    const flexToken = await cyber.encrypt(cardData, capture_context);
+
+    res.json({
+      'flexToken': flexToken,
+      'Encrypted By': '@RailgunMisaka'
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred during encryption.' });
+  }
+});
+
 app.post('/jwtGenerator', function (req, res) {
   try {
     const data = req.body;
