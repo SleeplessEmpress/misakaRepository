@@ -82,7 +82,65 @@ app.post('/adyenJWTEncrypt', function (req, res) {
         });
     } else if (!encryptionKey) {
         res.json({
-          "message": "Please fill the required field. Missing Encryptiom Key.",
+          "message": "Please fill the required field. Missing Encryption Key.",
+          "Encrypted by": "@RailgunMisaka"
+        });
+    } else {
+        res.json({
+          "message": "Please fill the required field. Missing Card Information and Encryption Key.",
+          "Encrypted by": "@RailgunMisaka"
+        });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred during encryption.' });
+  }
+});
+
+app.post('/cybersourceFlexV2', function (req, res) {
+  try {
+    const data = req.body;
+    const card = data.card;
+    const capture_context = data.capture_context;
+    const [cardNumber, expiryMonth, expiryYear, cvc] = card.split("|");
+    
+    const cyberEncrypt = require('cs2-encryption')
+    const cardTypeMap = {
+            '3': cyber.CardTypes.AmericanExpress,
+            '4': cyber.CardTypes.Visa,
+            '5': cyber.CardTypes.MasterCard
+            
+        }
+    const brand = cardTypeMap[ccType]
+    const data = {
+            number: cardNumber,
+            securityCode: cvc,
+            expirationMonth: expirationMonth,
+            expirationYear: expirationYear,
+            type: brand,
+        }
+    
+    if (card && capture_context) {
+        try {
+            const flexToken = await cyber.encrypt(data, capture_context)
+        
+            res.json({
+              'flexToken': flexToken,
+              'Encrypted By': '@RailgunMisaka'
+            });
+        }
+    } else if (!brand) {
+        res.json({
+          "message": "Please fill the required field. Card Type Not Supported",
+          "Encrypted by": "@RailgunMisaka"
+        });
+    }else if (!card) {
+        res.json({
+          "message": "Please fill the required field. Missing Card Information.",
+          "Encrypted by": "@RailgunMisaka"
+        });
+    } else if (!capture_context) {
+        res.json({
+          "message": "Please fill the required field. Missing Flext Token Key.",
           "Encrypted by": "@RailgunMisaka"
         });
     } else {
