@@ -69,16 +69,10 @@ app.post('/adyenJWTEncrypt', function (req, res) {
     const adyenEncrypt = require('adyen-4.5.0');
     
     if (card && encryptionKey) {
-        const encryptedCardNumber = adyenEncrypt(cardNumber, encryptionKey);
-        const encryptedExpiryMonth = adyenEncrypt(expiryMonth, encryptionKey);
-        const encryptedExpiryYear = adyenEncrypt(expiryYear, encryptionKey);
-        const encryptedSecurityCode = adyenEncrypt(cvc, encryptionKey);
+        const encryptedData = adyenEncrypt(cardNumber, expiryMonth, expiryYear, cvc, encryptionKey);
         
         res.json({
-          'encryptedCardNumber': encryptedCardNumber,
-          'encryptedExpiryMonth': encryptedExpiryMonth,
-          'encryptedExpiryYear': encryptedExpiryYear,
-          'encryptedSecurityCode': encryptedSecurityCode,
+          'encryptedData': encryptedData,
           'Encrypted By': '@RailgunMisaka'
         });
     } else if (!card) {
