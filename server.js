@@ -102,15 +102,16 @@ app.post('/cybersourceFlexV2', function (req, res) {
     const card = data.card;
     const capture_context = data.capture_context;
     const [cardNumber, expiryMonth, expiryYear, cvc] = card.split("|");
+    const cardType = cardNumber[0];
     
     const cyberEncrypt = require('cs2-encryption')
     const cardTypeMap = {
-            '3': cyber.CardTypes.AmericanExpress,
-            '4': cyber.CardTypes.Visa,
-            '5': cyber.CardTypes.MasterCard
+            '3': cyberEncrypt.CardTypes.AmericanExpress,
+            '4': cyberEncrypt.CardTypes.Visa,
+            '5': cyberEncrypt.CardTypes.MasterCard
             
         }
-    const brand = cardTypeMap[ccType]
+    const brand = cardTypeMap[cardType]
     const cardData = {
             number: cardNumber,
             securityCode: cvc,
@@ -120,14 +121,11 @@ app.post('/cybersourceFlexV2', function (req, res) {
         }
     
     if (card && capture_context) {
-        try {
-            const flexToken = await cyber.encrypt(cardData, capture_context)
+        const flexToken =  cyberEncrypt.encrypt(cardData, capture_context)
         
-            res.json({
-              'flexToken': flexToken,
-              'Encrypted By': '@RailgunMisaka'
-            });
-        }
+        res.json({
+          'flexToken': flexToken,
+          'Encrypted By': '@RailgunMisaka'
     } else if (!brand) {
         res.json({
           "message": "Please fill the required field. Card Type Not Supported",
