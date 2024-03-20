@@ -59,100 +59,6 @@ app.post('/adyenEncrypt', function (req, res) {
   }
 });
 
-app.post('/adyenJWTEncrypt', function (req, res) {
-  try {
-    const data = req.body;
-    const card = data.card;
-    const encryptionKey = data.encryptionKey;
-    const [cardNumber, expiryMonth, expiryYear, cvc] = card.split("|");
-    
-    const adyenEncrypt = require('adyen-4.5.0');
-    
-    if (card && encryptionKey) {
-        const encryptedData = adyenEncrypt(cardNumber, expiryMonth, expiryYear, cvc, encryptionKey);
-        
-        res.json({
-          'encryptedData': encryptedData,
-          'Encrypted By': '@RailgunMisaka'
-        });
-    } else if (!card) {
-        res.json({
-          "message": "Please fill the required field. Missing Card Information.",
-          "Encrypted by": "@RailgunMisaka"
-        });
-    } else if (!encryptionKey) {
-        res.json({
-          "message": "Please fill the required field. Missing Encryption Key.",
-          "Encrypted by": "@RailgunMisaka"
-        });
-    } else {
-        res.json({
-          "message": "Please fill the required field. Missing Card Information and Encryption Key.",
-          "Encrypted by": "@RailgunMisaka"
-        });
-    }
-  } catch (error) {
-    res.status(500).json({ error: 'An error occurred during encryption.' });
-  }
-});
-
-app.post('/cybersourceFlexV2', function (req, res) {
-  try {
-    const data = req.body;
-    const card = data.card;
-    const capture_context = data.capture_context;
-    const [cardNumber, expiryMonth, expiryYear, cvc] = card.split("|");
-    const cardType = cardNumber.charAt(0);
-    
-    const cyberEncrypt = require('cs2-encryption')
-    const cardTypeMap = {
-            '3': cyberEncrypt.CardTypes.AmericanExpress,
-            '4': cyberEncrypt.CardTypes.Visa,
-            '5': cyberEncrypt.CardTypes.MasterCard
-            
-        }
-    const brand = cardTypeMap[cardType]
-    const cardData = {
-            number: cardNumber,
-            securityCode: cvc,
-            expirationMonth: expiryMonth,
-            expirationYear: expiryYear,
-            type: brand,
-        }
-    
-    if (card && capture_context) {
-        const flexToken =  cyberEncrypt.encrypt(cardData, capture_context)
-        
-        res.json({
-          'flexToken': flexToken,
-          'Encrypted By': '@RailgunMisaka'
-        });
-    } else if (!brand) {
-        res.json({
-          "message": "Please fill the required field. Card Type Not Supported",
-          "Encrypted by": "@RailgunMisaka"
-        });
-    } else if (!card) {
-        res.json({
-          "message": "Please fill the required field. Missing Card Information.",
-          "Encrypted by": "@RailgunMisaka"
-        });
-    } else if (!capture_context) {
-        res.json({
-          "message": "Please fill the required field. Missing Flext Token Key.",
-          "Encrypted by": "@RailgunMisaka"
-        });
-    } else {
-        res.json({
-          "message": "Please fill the required field. Missing Card Information and Encryption Key.",
-          "Encrypted by": "@RailgunMisaka"
-        });
-    }
-  } catch (error) {
-    res.status(500).json({ error: 'An error occurred during encryption.' });
-  }
-});
-
 app.post('/adyenSingleEncryption', function (req, res) {
   try {
     const data = req.body;
@@ -184,6 +90,26 @@ app.post('/adyenSingleEncryption', function (req, res) {
 
     const cseInstance = adyenEncrypt.createEncryption(adyenKey, options);
     const encryptedData = cseInstance.encrypt(cardData);
+
+    res.json({
+      'encryptedData': encryptedData,
+      'Encrypted By': '@RailgunMisaka'
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred during encryption.' });
+  }
+});
+
+app.post('/adyenJWTEncrypt', function (req, res) {
+  try {
+    const data = req.body;
+    const card = data.card;
+    const encryptionKey = data.encryptionKey;
+    const [number, expiryMonth, expiryYear, cvc] = card.split("|");
+
+    const encryptCardData = require('adyen-4.5.0');
+
+    const encryptedData = encryptCardData(number, expiryMonth, expiryYear, cvc, encryptionKey);
 
     res.json({
       'encryptedData': encryptedData,
@@ -455,7 +381,7 @@ app.post('/encryptData', function (req, res) {
         });
     } else {
       res.json({
-          "message": "Failed during encryption.",
+          "message": "Failed durimh encryption.",
           "Encrypted by": "@RailgunMisaka"
         });
     }

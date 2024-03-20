@@ -8,8 +8,7 @@
     "request": "^2.88.2",
     "node-rsa": "^1.1.1",
     "axios": "^0.24.0",
-    "adyen-4.5.0": "^1.0.0",
-    "cs2-encryption": "^1.0.4"
+    "adyen-4.5.0": "^1.0.0"
   },
   "name": "adyen",
   "version": "1.0.0",
