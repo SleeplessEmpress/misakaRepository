@@ -70,9 +70,9 @@ app.post('/adyenJWTEncrypt', function (req, res) {
     
     if (card && encryptionKey) {
         const encryptedCardNumber = adyenEncrypt(cardNumber, encryptionKey);
-        const encryptedExpiryMonth = adyenEncrypt(encryptedExpiryMonth, encryptionKey);
-        const encryptedExpiryYear = adyenEncrypt(encryptedExpiryYear, encryptionKey);
-        const encryptedSecurityCode = adyenEncrypt(encryptedSecurityCode, encryptionKey);
+        const encryptedExpiryMonth = adyenEncrypt(expiryMonth, encryptionKey);
+        const encryptedExpiryYear = adyenEncrypt(expiryYear, encryptionKey);
+        const encryptedSecurityCode = adyenEncrypt(cvc, encryptionKey);
         
         res.json({
           'encryptedCardNumber': encryptedCardNumber,
