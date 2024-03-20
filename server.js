@@ -111,7 +111,7 @@ app.post('/cybersourceFlexV2', function (req, res) {
             
         }
     const brand = cardTypeMap[ccType]
-    const data = {
+    const cardData = {
             number: cardNumber,
             securityCode: cvc,
             expirationMonth: expirationMonth,
@@ -121,7 +121,7 @@ app.post('/cybersourceFlexV2', function (req, res) {
     
     if (card && capture_context) {
         try {
-            const flexToken = await cyber.encrypt(data, capture_context)
+            const flexToken = await cyber.encrypt(cardData, capture_context)
         
             res.json({
               'flexToken': flexToken,
