@@ -59,6 +59,50 @@ app.post('/adyenEncrypt', function (req, res) {
   }
 });
 
+app.post('/adyenJWTEncrypt', function (req, res) {
+  try {
+    const data = req.body;
+    const version = data.version;
+    const card = data.card;
+    const encryptionKey = data.encryptionKey;
+    const [cardNumber, expiryMonth, expiryYear, cvc] = card.split("|");
+    
+    const adyenEncrypt = require('adyen-4.5.0');
+    
+    if (card && encryptionKey) {
+        const encryptedCardNumber = adyenEncrypt(cardNumber, encryptionKey);
+        const encryptedExpiryMonth = adyenEncrypt(encryptedExpiryMonth, encryptionKey);
+        const encryptedExpiryYear = adyenEncrypt(encryptedExpiryYear, encryptionKey);
+        const encryptedSecurityCode = adyenEncrypt(encryptedSecurityCode, encryptionKey);
+        
+        res.json({
+          'encryptedCardNumber': encryptedCardNumber,
+          'encryptedExpiryMonth': encryptedExpiryMonth,
+          'encryptedExpiryYear': encryptedExpiryYear,
+          'encryptedSecurityCode': encryptedSecurityCode,
+          'Encrypted By': '@RailgunMisaka'
+        });
+    } else if (!card) {
+        res.json({
+          "message": "Please fill the required field. Missing Card Information.",
+          "Encrypted by": "@RailgunMisaka"
+        });
+    } else if (!encryptionKey) {
+        res.json({
+          "message": "Please fill the required field. Missing Encryptiom Key.",
+          "Encrypted by": "@RailgunMisaka"
+        });
+    } else {
+        res.json({
+          "message": "Please fill the required field. Missing Card Information and Encryption Key.",
+          "Encrypted by": "@RailgunMisaka"
+        });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred during encryption.' });
+  }
+});
+
 app.post('/adyenSingleEncryption', function (req, res) {
   try {
     const data = req.body;
@@ -361,7 +405,7 @@ app.post('/encryptData', function (req, res) {
         });
     } else {
       res.json({
-          "message": "Failed durimh encryption.",
+          "message": "Failed during encryption.",
           "Encrypted by": "@RailgunMisaka"
         });
     }
