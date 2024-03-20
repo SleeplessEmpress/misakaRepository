@@ -126,7 +126,7 @@ app.post('/cybersourceFlexV2', function (req, res) {
         res.json({
           'flexToken': flexToken,
           'Encrypted By': '@RailgunMisaka'
-        )}
+        )};
     } else if (!brand) {
         res.json({
           "message": "Please fill the required field. Card Type Not Supported",
