@@ -62,7 +62,6 @@ app.post('/adyenEncrypt', function (req, res) {
 app.post('/adyenJWTEncrypt', function (req, res) {
   try {
     const data = req.body;
-    const version = data.version;
     const card = data.card;
     const encryptionKey = data.encryptionKey;
     const [cardNumber, expiryMonth, expiryYear, cvc] = card.split("|");
