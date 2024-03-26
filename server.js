@@ -107,6 +107,9 @@ app.post('/adyenJWTEncrypt', function (req, res) {
     const secureFieldsUrl = data.secureFieldsUrl;
     const [number, expiryMonth, expiryYear, cvc] = card.split("|");
 
+    const axios = require('axios');
+    const encryptCardData = require('adyen-4.5.0');
+
     axios.get(secureFieldsUrl)
       .then(response => {
         const originMatches = response.data.match(/var origin = "(.*?)"/);
