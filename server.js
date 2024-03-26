@@ -104,18 +104,40 @@ app.post('/adyenJWTEncrypt', function (req, res) {
   try {
     const data = req.body;
     const card = data.card;
-    const encryptionKey = data.encryptionKey;
+    const secureFieldsUrl = data.secureFieldsUrl;
     const [number, expiryMonth, expiryYear, cvc] = card.split("|");
 
-    const encryptCardData = require('adyen-4.5.0');
+    axios.get(secureFieldsUrl)
+      .then(response => {
+        const originMatches = response.data.match(/var origin = "(.*?)"/);
+        const originKeyMatches = response.data.match(/var originKey = "(.*?)"/);
+        const adyenKeyMatches = response.data.match(/adyen\.key\s*=\s*"([^"]+)"/);
 
-    const encryptedData = encryptCardData(number, expiryMonth, expiryYear, cvc, encryptionKey);
+        if (
+          originMatches && originMatches.length > 1 &&
+          originKeyMatches && originKeyMatches.length > 1 &&
+          adyenKeyMatches && adyenKeyMatches.length > 1
+        ) {
+          const origin = originMatches[1].trim();
+          const originKey = originKeyMatches[1].trim();
+          const adyenKey = adyenKeyMatches[1].trim();
 
-    res.json({
-      'encryptedData': encryptedData,
-      'Encrypted By': '@RailgunMisaka'
-    });
+          const encryptedData = encryptCardData(number, expiryMonth, expiryYear, cvc, adyenKey, originKey, origin);
+
+          res.json({
+            'encryptedData': encryptedData,
+            'Encrypted By': '@RailgunMisaka'
+          });
+        } else {
+          res.status(500).json({ error: 'Failed to fetch Adyen keys.' });
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching secure fields data.');
+        res.status(500).json({ error: 'An error occurred during encryption.' });
+      });
   } catch (error) {
+    console.error('Error processing request:', error);
     res.status(500).json({ error: 'An error occurred during encryption.' });
   }
 });
