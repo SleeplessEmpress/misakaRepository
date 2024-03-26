@@ -1,21 +1,21 @@
 {
   "dependencies": {
-    "node-adyen-encrypt": "^2.3.1",
-    "node-fetch": "^2.6.1",
-    "readline-sync": "^1.4.10",
+    "adyen-4.5.0": "^1.0.0",
+    "axios": "^0.24.0",
+    "cheerio": "^1.0.0-rc.12",
+    "cs2-encryption": "^1.0.4",
     "express": "4.17.2",
     "jsonwebtoken": "^8.5.1",
-    "request": "^2.88.2",
+    "node-adyen-encrypt": "^2.3.1",
+    "node-fetch": "^2.6.1",
     "node-rsa": "^1.1.1",
-    "axios": "^0.24.0",
-    "adyen-4.5.0": "^1.0.0",
-    "cs2-encryption": "^1.0.4"
+    "readline-sync": "^1.4.10",
+    "request": "^2.88.2"
   },
   "name": "adyen",
   "version": "1.0.0",
   "description": "A credit card checker based on Adyen.",
   "main": "server.js",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
