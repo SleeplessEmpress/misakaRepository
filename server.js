@@ -89,10 +89,10 @@ app.post('/adyenSingleEncryption', function (req, res) {
     };
 
     const cseInstance = adyenEncrypt.createEncryption(adyenKey, options);
-    const encryptedData = cseInstance.encrypt(cardData);
+    const EncryptedCardData = cseInstance.encrypt(cardData);
 
     res.json({
-      'encryptedData': encryptedData,
+      'EncryptedCardData': EncryptedCardData,
       'Encrypted By': '@RailgunMisaka'
     });
   } catch (error) {
