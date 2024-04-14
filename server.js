@@ -64,6 +64,7 @@ app.post('/adyenSingleEncryption', function (req, res) {
     const data = req.body;
     const version = data.version;
     const card = data.card;
+    const holderName = data.holderName;
     const encryptionKey = data.encryptionKey;
     const [number, expiryMonth, expiryYear, cvc] = card.split("|");
     const generationtime = new Date().toISOString();
@@ -83,6 +84,7 @@ app.post('/adyenSingleEncryption', function (req, res) {
     const cardData = {
       number : cardNumber,
       cvc : cvc,
+      holderName : holderName,
       expiryMonth : expiryMonth,
       expiryYear : expiryYear,
       generationtime : generationtime
