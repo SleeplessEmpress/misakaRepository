@@ -16,7 +16,7 @@ app.post('/adyenEncrypt', function (req, res) {
     const generationtime = new Date().toISOString();
 
     const UserAgent = require('user-agents');
-    const RiskData = require("adyen-risk-data");
+    const RiskData = require("adyen-riskData");
     const adyenEncrypt = require('node-adyen-encrypt')(version);
     const adyenKey = encryptionKey;
     const generationtime = new Date().toISOString();
