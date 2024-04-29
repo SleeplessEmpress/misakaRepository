@@ -41,6 +41,8 @@ app.post('/adyenEncrypt', function (req, res) {
         "MacIntel"
     );
 
+    const clientData = riskDataInstance.generate();
+
     const options = {};
 
     const cardData = {
@@ -71,7 +73,7 @@ app.post('/adyenEncrypt', function (req, res) {
     const encryptedSecurityCode = cseInstance.encrypt(cardData3);
 
     res.json({
-      'clientData': riskDataInstance.generate(),
+      'clientData': clientData,
       'encryptedCardNumber': encryptedCardNumber,
       'encryptedExpiryMonth': encryptedExpiryMonth,
       'encryptedExpiryYear': encryptedExpiryYear,
