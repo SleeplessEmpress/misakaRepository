@@ -13,33 +13,10 @@ app.post('/adyenEncrypt', function (req, res) {
     const card = data.card;
     const encryptionKey = data.encryptionKey;
     const [cardNumber, expiryMonth, expiryYear, cvc] = card.split("|");
-    
-    const UserAgent = require('user-agents');
-    const RiskData = require("adyen-riskData");
-    const adyenEncrypt = require('node-adyen-encrypt')(version);
-    const adyenKey = encryptionKey;
     const generationtime = new Date().toISOString();
 
-    function generateRandomUserAgent() {
-    const randomUserAgent = new UserAgent();
-        return randomUserAgent.toString();
-    }
-    const randomUserAgent = generateRandomUserAgent();
-
-    let riskDataInstance = new RiskData(
-        generateRandomUserAgent(),
-        "en-US",
-        24,
-        4,
-        8,
-        360,
-        640,
-        360,
-        640,
-        -300,
-        "America/Chicago",
-        "MacIntel"
-    );
+    const adyenEncrypt = require('node-adyen-encrypt')(version);
+    const adyenKey = encryptionKey;
 
     const options = {};
 
@@ -71,7 +48,6 @@ app.post('/adyenEncrypt', function (req, res) {
     const encryptedSecurityCode = cseInstance.encrypt(cardData3);
 
     res.json({
-      'clientData': riskDataInstance.generate(),
       'encryptedCardNumber': encryptedCardNumber,
       'encryptedExpiryMonth': encryptedExpiryMonth,
       'encryptedExpiryYear': encryptedExpiryYear,
