@@ -15,7 +15,7 @@ app.post('/adyenEncrypt', function (req, res) {
     const [cardNumber, expiryMonth, expiryYear, cvc] = card.split("|");
     
     const UserAgent = require('user-agents');
-    const RiskData = require("adyen-risk-data");
+    const RiskData = require("adyen-riskData");
     const adyenEncrypt = require('node-adyen-encrypt')(version);
     const adyenKey = encryptionKey;
     const generationtime = new Date().toISOString();
