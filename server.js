@@ -19,7 +19,6 @@ app.post('/adyenEncrypt', function (req, res) {
     const RiskData = require("adyen-riskData");
     const adyenEncrypt = require('node-adyen-encrypt')(version);
     const adyenKey = encryptionKey;
-    const generationtime = new Date().toISOString();
 
     function generateRandomUserAgent() {
     const randomUserAgent = new UserAgent();
