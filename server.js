@@ -13,35 +13,8 @@ app.post('/adyenEncrypt', function (req, res) {
     const card = data.card;
     const encryptionKey = data.encryptionKey;
     const [cardNumber, expiryMonth, expiryYear, cvc] = card.split("|");
-    const generationtime = new Date().toISOString();
 
-    const UserAgent = require('user-agents');
-    const RiskData = require("adyen-riskData");
     const adyenEncrypt = require('node-adyen-encrypt')(version);
-    const adyenKey = encryptionKey;
-
-    function generateRandomUserAgent() {
-    const randomUserAgent = new UserAgent();
-        return randomUserAgent.toString();
-    }
-    const randomUserAgent = generateRandomUserAgent();
-
-    let riskDataInstance = new RiskData(
-        generateRandomUserAgent(),
-        "en-US",
-        24,
-        4,
-        8,
-        360,
-        640,
-        360,
-        640,
-        -300,
-        "America/Chicago",
-        "MacIntel"
-    );
-
-    const options = {};
 
     const cardData = {
       number: cardNumber,
@@ -63,7 +36,7 @@ app.post('/adyenEncrypt', function (req, res) {
       generationtime: generationtime
     };
 
-    const cseInstance = adyenEncrypt.createEncryption(adyenKey, options);
+    const cseInstance = adyenEncrypt.createEncryption(adyenKey, {});
 
     const encryptedCardNumber = cseInstance.encrypt(cardData);
     const encryptedExpiryMonth = cseInstance.encrypt(cardData1);
@@ -71,7 +44,6 @@ app.post('/adyenEncrypt', function (req, res) {
     const encryptedSecurityCode = cseInstance.encrypt(cardData3);
 
     res.json({
-      'clientData': riskDataInstance.generate(),
       'encryptedCardNumber': encryptedCardNumber,
       'encryptedExpiryMonth': encryptedExpiryMonth,
       'encryptedExpiryYear': encryptedExpiryYear,
@@ -79,94 +51,6 @@ app.post('/adyenEncrypt', function (req, res) {
       'Encrypted By': '@RailgunMisaka'
     });
   } catch (error) {
-    res.status(500).json({ error: 'An error occurred during encryption.' });
-  }
-});
-
-app.post('/adyenSingleEncryption', function (req, res) {
-  try {
-    const data = req.body;
-    const version = data.version;
-    const card = data.card;
-    const holderName = data.holderName;
-    const encryptionKey = data.encryptionKey;
-    const [number, expiryMonth, expiryYear, cvc] = card.split("|");
-    const generationtime = new Date().toISOString();
-
-    function addSpacesToCardNumber(number) {
-      const cardNumberWithoutSpaces = number.replace(/\s/g, '');
-      const cardNumber = cardNumberWithoutSpaces.replace(/(.{4})/g, '$1 ');
-      return cardNumber.trim();
-    }
-
-    const cardNumber = addSpacesToCardNumber(number);
-    const adyenEncrypt = require('node-adyen-encrypt')(version);
-    const adyenKey = encryptionKey;
-
-    const options = {};
-
-    const cardData = {
-      number : cardNumber,
-      cvc : cvc,
-      holderName : holderName,
-      expiryMonth : expiryMonth,
-      expiryYear : expiryYear,
-      generationtime : generationtime
-    };
-
-    const cseInstance = adyenEncrypt.createEncryption(adyenKey, options);
-    const EncryptedCardData = cseInstance.encrypt(cardData);
-
-    res.json({
-      'EncryptedCardData': EncryptedCardData,
-      'Encrypted By': '@RailgunMisaka'
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'An error occurred during encryption.' });
-  }
-});
-
-app.post('/adyenJWTEncrypt', function (req, res) {
-  try {
-    const data = req.body;
-    const card = data.card;
-    const secureFieldsUrl = data.secureFieldsUrl;
-    const [number, expiryMonth, expiryYear, cvc] = card.split("|");
-
-    const axios = require('axios');
-    const encryptCardData = require('adyen-4.5.0');
-
-    axios.get(secureFieldsUrl)
-      .then(response => {
-        const originMatches = response.data.match(/var origin = "(.*?)"/);
-        const originKeyMatches = response.data.match(/var originKey = "(.*?)"/);
-        const adyenKeyMatches = response.data.match(/adyen\.key\s*=\s*"([^"]+)"/);
-
-        if (
-          originMatches && originMatches.length > 1 &&
-          originKeyMatches && originKeyMatches.length > 1 &&
-          adyenKeyMatches && adyenKeyMatches.length > 1
-        ) {
-          const origin = originMatches[1].trim();
-          const originKey = originKeyMatches[1].trim();
-          const adyenKey = adyenKeyMatches[1].trim();
-
-          const encryptedData = encryptCardData(number, expiryMonth, expiryYear, cvc, adyenKey, originKey, origin);
-
-          res.json({
-            'encryptedData': encryptedData,
-            'Encrypted By': '@RailgunMisaka'
-          });
-        } else {
-          res.status(500).json({ error: 'Failed to fetch Adyen keys.' });
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching secure fields data.');
-        res.status(500).json({ error: 'An error occurred during encryption.' });
-      });
-  } catch (error) {
-    console.error('Error processing request:', error);
     res.status(500).json({ error: 'An error occurred during encryption.' });
   }
 });
@@ -205,46 +89,6 @@ app.post('/cybersourceFlexV2', async function (req, res) {
     });
   } catch (error) {
     res.status(500).json({ error: 'An error occurred during encryption.' });
-  }
-});
-
-app.post('/jwtGenerator', function (req, res) {
-  try {
-    const data = req.body;
-    const signingKey = data.signingKey;
-    const invoice = data.invoice;
-
-    const jwt = require('jsonwebtoken');
-
-    function genJwt() {
-
-        const header = {
-            "alg": "HS256",
-            "typ": "JWT"
-        };
-
-        const time = Math.floor(Date.now() / 1000);
-        
-        const payload = {
-            'invoice_id': invoice,
-            'iat': time,
-            'exp': (time + 900)
-        };
-
-        const jwtToken = jwt.sign(payload, signingKey, { algorithm: 'HS256', header });
-
-        return jwtToken;
-    }
-
-    const jwtToken = genJwt();
-
-    res.json({
-      'JWT': jwtToken,
-      'Generator by': '@RailgunMisaka',
-      'Credits to': '@dhdu283 (Chillz)'
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'An error occurred during generation.' });
   }
 });
 
@@ -325,38 +169,6 @@ app.post('/v3', async function (req, res) {
   }
 });
 
-app.post('/cloverEncrypt', function (req, res) {
-  try {
-    const data = req.body;
-    const cardNumber = data.cardNumber;
-
-    const NodeRSA = require('node-rsa');
-
-    const rsaPublicKey = `-----BEGIN PUBLIC KEY-----
-    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArxHJAejXwDpyWwjsMzL7
-    D1WJ/rDCaiqvsiiHZA+8nnVHVD65oWB9HH1O+ONuhhSblWBNKB0YWeA47cS0JisT
-    izZAvXHfRNC2Sp9ZnSQvtA67GKPZsTsvOS2AlrExvYHc7ibwVVvLoz/ByJV/N7w5
-    lBABmu57aFuIa4GEWPfb677dqnv695D1qlbJwTI+BjPk/OPHXuudYG1bi1uE7goq
-    StX/fL6D0joXnzzMzs2ZdUKMAV/zC/kaILlAe5qA1q3aQQfd8h+gkYCskjfOrp38
-    abNCe/DFXceq9qQ3R5YkviCxQAZJBZYzD1FjtTsOG7xIV4uoQLJjHzsJaQLkDdrw
-    YwIDAQAB
-    -----END PUBLIC KEY-----`;
-
-    const key = new NodeRSA();
-    key.importKey(rsaPublicKey, 'pkcs8-public-pem');
-
-    const paddedCardNumber = '00000000' + cardNumber;
-    const encrypted_pan = key.encrypt(paddedCardNumber, 'base64');
-
-    res.json({
-      'encrypted_pan': encrypted_pan,
-      'Encrypted by': '@RailgunMisaka'
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'An error occurred during encryption.' });
-  }
-});
-
 app.post('/securepayEncrypt', function (req, res) {
   try {
     const data = req.body;
@@ -393,88 +205,6 @@ app.post('/securepayEncrypt', function (req, res) {
     });
   } catch (error) {
     res.status(500).json({ error: 'An error occurred during encryption.' });
-  }
-});
-
-app.post('/encryptData', function (req, res) {
-  try {
-    const data = req.body;
-    const cardNumber = data.cardNumber;
-    const cardSecurityCode = data.cardSecurityCode;
-    const publicKey = data.publicKey;
-
-    const NodeRSA = require('node-rsa');
-
-    function formatPEM(publicKey) {
-
-      const PEMHeader = "-----BEGIN PUBLIC KEY-----\n";
-      const PEMFooter = "\n-----END PUBLIC KEY-----";
-      const keyLength = publicKey.length;
-      
-      let formattedKey = "";
-
-      for (let i = 0; i < keyLength; i += 64) {
-        formattedKey += publicKey.substring(i, Math.min(i + 64, keyLength)) + "\n";
-      }
-      return PEMHeader + formattedKey + PEMFooter;
-    }
-
-    if (cardNumber && cardSecurityCode && publicKey) {
-      const PEMKey = formatPEM(publicKey);
-
-      const key = new NodeRSA();
-      key.importKey(PEMKey, 'pkcs8-public-pem');
-
-      const encryptedCardNumber = key.encrypt(cardNumber, 'base64');
-      const encryptedSecurityCode = key.encrypt(cardSecurityCode, 'base64');
-
-      res.json({
-        "encryptedCardNumber": encryptedCardNumber,
-        "encryptedSecurityCode": encryptedSecurityCode,
-        "Encrypted by": "@RailgunMisaka"
-      });
-    } else if (cardNumber && publicKey) {
-      const PEMKey = formatPEM(publicKey);
-
-      const key = new NodeRSA();
-      key.importKey(PEMKey, 'pkcs8-public-pem');
-
-      const encryptedCardNumber = key.encrypt(cardNumber, 'base64');
-
-      res.json({
-        "encryptedCardNumber": encryptedCardNumber,
-        "Encrypted by": "@RailgunMisaka"
-      });
-    } else if (cardSecurityCode && publicKey) {
-      const PEMKey = formatPEM(publicKey);
-
-      const key = new NodeRSA();
-      key.importKey(PEMKey, 'pkcs8-public-pem');
-
-      const encryptedSecurityCode = key.encrypt(cardSecurityCode, 'base64');
-
-      res.json({
-        "encryptedSecurityCode": encryptedSecurityCode,
-        "Encrypted by": "@RailgunMisaka"
-      });
-    } else if (!cardNumber && !cardSecurityCode){
-      res.json({
-          "message": "Please fill the required field. Missing Card Number and Card Security Code.",
-          "Encrypted by": "@RailgunMisaka"
-        });
-    } else if (!publicKey) {
-      res.json({
-          "message": "Please fill the required field. Missing Public Key.",
-          "Encrypted by": "@RailgunMisaka"
-        });
-    } else {
-      res.json({
-          "message": "Failed durimh encryption.",
-          "Encrypted by": "@RailgunMisaka"
-        });
-    }
-  } catch (error) {
-    res.status(500).json({ error: 'There was an error while processing your request' });
   }
 });
 
