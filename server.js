@@ -13,8 +13,12 @@ app.post('/adyenEncrypt', function (req, res) {
     const card = data.card;
     const encryptionKey = data.encryptionKey;
     const [cardNumber, expiryMonth, expiryYear, cvc] = card.split("|");
+    const generationtime = new Date().toISOString();
 
     const adyenEncrypt = require('node-adyen-encrypt')(version);
+    const adyenKey = encryptionKey;
+
+    const options = {};
 
     const cardData = {
       number: cardNumber,
@@ -36,7 +40,7 @@ app.post('/adyenEncrypt', function (req, res) {
       generationtime: generationtime
     };
 
-    const cseInstance = adyenEncrypt.createEncryption(encryptionKey, {});
+    const cseInstance = adyenEncrypt.createEncryption(adyenKey, options);
 
     const encryptedCardNumber = cseInstance.encrypt(cardData);
     const encryptedExpiryMonth = cseInstance.encrypt(cardData1);
