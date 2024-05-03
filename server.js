@@ -36,7 +36,7 @@ app.post('/adyenEncrypt', function (req, res) {
       generationtime: generationtime
     };
 
-    const cseInstance = adyenEncrypt.createEncryption(adyenKey, {});
+    const cseInstance = adyenEncrypt.createEncryption(encryptionKey, {});
 
     const encryptedCardNumber = cseInstance.encrypt(cardData);
     const encryptedExpiryMonth = cseInstance.encrypt(cardData1);
