@@ -6,11 +6,6 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const express = require('express');
-const bodyParser = require('body-parser');
-const app = express();
-app.use(bodyParser.json());
-
 app.post('/adyenEncrypt', function (req, res) {
   try {
     const data = req.body;
@@ -85,10 +80,6 @@ app.post('/adyenEncrypt', function (req, res) {
   } catch (error) {
     res.status(500).json({ error: 'An error occurred during encryption.' });
   }
-});
-
-app.listen(3000, function () {
-  console.log('Server is running on port 3000');
 });
 
 app.post('/cybersourceFlexV2', async function (req, res) {
