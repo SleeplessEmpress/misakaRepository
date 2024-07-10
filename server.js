@@ -6,12 +6,39 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const express = require('express');
+const bodyParser = require('body-parser');
+const app = express();
+app.use(bodyParser.json());
+
 app.post('/adyenEncrypt', function (req, res) {
   try {
     const data = req.body;
     const version = data.version;
     const card = data.card;
     const encryptionKey = data.encryptionKey;
+    const userAgent = data.userAgent; // Added userAgent from data
+
+    const RiskData = require("adyen-riskData");
+
+    // Create RiskData instance with dynamic userAgent
+    let riskDataInstance = new RiskData(
+      userAgent, // userAgent
+      "en-US", // language
+      24, // colorDepth
+      4, // deviceMemory 
+      8, // hardwareConcurrency
+      360, // screenWidth
+      640, // screenHeight
+      360, // availScreenWidth
+      640, // availScreenHeight
+      -300, // timezoneOffset
+      "America/Chicago", // timezone
+      "MacIntel" // platform
+    );
+
+    const riskData = riskDataInstance.generate();
+
     const [cardNumber, expiryMonth, expiryYear, cvc] = card.split("|");
     const generationtime = new Date().toISOString();
 
@@ -48,6 +75,7 @@ app.post('/adyenEncrypt', function (req, res) {
     const encryptedSecurityCode = cseInstance.encrypt(cardData3);
 
     res.json({
+      'riskData': riskData,
       'encryptedCardNumber': encryptedCardNumber,
       'encryptedExpiryMonth': encryptedExpiryMonth,
       'encryptedExpiryYear': encryptedExpiryYear,
@@ -57,6 +85,10 @@ app.post('/adyenEncrypt', function (req, res) {
   } catch (error) {
     res.status(500).json({ error: 'An error occurred during encryption.' });
   }
+});
+
+app.listen(3000, function () {
+  console.log('Server is running on port 3000');
 });
 
 app.post('/cybersourceFlexV2', async function (req, res) {
