@@ -12,7 +12,7 @@
     "node-fetch": "^2.6.1",
     "node-rsa": "^1.1.1",
     "readline-sync": "^1.4.10",
-    "request": "^2.88.2",
+    "request": "^2.88.2"
   },
   "name": "adyen",
   "version": "1.0.0",
