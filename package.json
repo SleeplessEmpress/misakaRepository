@@ -1,11 +1,8 @@
 {
   "dependencies": {
+    "adyen-4.4.1": "^1.0.1",
     "adyen-4.5.0": "^1.0.0",
-    "adyen-5.11.0": "^1.0.0",
-    "adyen-cse-web": "^0.0.1",
-    "adyen-riskdata": "^1.0.1",
     "axios": "^0.24.0",
-    "cheerio": "^1.0.0-rc.12",
     "crypto-js": "^4.2.0",
     "cs2-encryption": "^1.0.4",
     "express": "4.17.2",
@@ -14,10 +11,8 @@
     "node-adyen-encrypt": "^2.3.1",
     "node-fetch": "^2.6.1",
     "node-rsa": "^1.1.1",
-    "puppeteer": "^22.6.5",
     "readline-sync": "^1.4.10",
     "request": "^2.88.2",
-    "user-agents": "^1.1.189"
   },
   "name": "adyen",
   "version": "1.0.0",

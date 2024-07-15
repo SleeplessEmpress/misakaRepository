@@ -59,6 +59,31 @@ app.post('/adyenEncrypt', function (req, res) {
   }
 });
 
+app.post('/adyenJWTEncrypt', function (req, res) {
+  try {
+    const data = req.body;
+    const version = data.version;
+    const card = data.card;
+    const encryptionKey = data.encryptionKey;
+    const [cardNumber, expiryMonth, expiryYear, cvc] = card.split("|");
+
+    const encryptCardData = require(adyen-${version});
+    const adyenKey = encryptionKey;
+
+    const encryptedData = encryptCardData(number, expiryMonth, expiryYear, cvc, adyenKey);
+
+    res.json({
+      'encryptedCardNumber': encryptedData.encryptedCardNumber,
+      'encryptedExpiryMonth': encryptedData.encryptedExpiryMonth,
+      'encryptedExpiryYear': encryptedData.encryptedExpiryYear,
+      'encryptedSecurityCode': encryptedData.encryptedSecurityCode,
+      'Encrypted By': '@RailgunMisaka'
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred during encryption.' });
+  }
+});
+
 app.post('/cybersourceFlexV2', async function (req, res) {
   try {
     const data = req.body;
