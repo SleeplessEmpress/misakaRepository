@@ -67,10 +67,10 @@ app.post('/adyenJWTEncrypt', function (req, res) {
     const encryptionKey = data.encryptionKey;
     const [cardNumber, expiryMonth, expiryYear, cvc] = card.split("|");
 
-    const encryptCardData = require(adyen-${version});
+    const encryptCardData = require(`adyen-${version}`);
     const adyenKey = encryptionKey;
 
-    const encryptedData = encryptCardData(number, expiryMonth, expiryYear, cvc, adyenKey);
+    const encryptedData = encryptCardData(cardNumber, expiryMonth, expiryYear, cvc, adyenKey);
 
     res.json({
       'encryptedCardNumber': encryptedData.encryptedCardNumber,
