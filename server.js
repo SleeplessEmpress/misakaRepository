@@ -87,10 +87,11 @@ app.post('/adyenJWTEncrypt', function (req, res) {
 app.post('/cybersourceFlexV1', async function (req, res) {
   try {
     const data = req.body;
-    const version = data.version;
     const cardNumber = data.cardNumber;
     const kid = data.kid;
     const n = data.n;
+
+    const forge = require('node-forge');
 
     async function importKey(jwt, card) {
       const jwk = JSON.parse(jwt);
@@ -108,6 +109,7 @@ app.post('/cybersourceFlexV1', async function (req, res) {
           md: forge.md.sha256.create(),
         })
       );
+
       return encryptedBuffer;
     }
 
@@ -120,10 +122,12 @@ app.post('/cybersourceFlexV1', async function (req, res) {
     });
 
     const encryptedCardNumber = await importKey(jwt, cardNumber);
+
     res.json({
       'cardNumber': encryptedCardNumber,
       'Encrypted By': '@RailgunMisaka'
     });
+
   } catch (error) {
     res.status(500).json({ error: 'An error occurred during encryption.' });
   }
