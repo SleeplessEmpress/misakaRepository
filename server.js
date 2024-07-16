@@ -88,29 +88,29 @@ app.post('/cybersourceFlexV1', async function (req, res) {
   try {
     const data = req.body;
     const version = data.version;
-    const card = data.card;
+    const cardNumber = data.cardNumber;
     const kid = data.kid;
     const n = data.n;
-    const [cardNumber, expiryMonth, expiryYear, cvc] = card.split("|");
 
     async function importKey(jwt, card) {
       const jwk = JSON.parse(jwt);
-      const n = Buffer.from(jwk.n, 'base64');
-      const e = Buffer.from(jwk.e, 'base64');
+      const nBuffer = Buffer.from(jwk.n, 'base64');
+      const eBuffer = Buffer.from(jwk.e, 'base64');
 
       const publicKey = forge.pki.setRsaPublicKey(
-        new forge.jsbn.BigInteger(n.toString('hex'), 16),
-        new forge.jsbn.BigInteger(e.toString('hex'), 16)
-        );
+        new forge.jsbn.BigInteger(nBuffer.toString('hex'), 16),
+        new forge.jsbn.BigInteger(eBuffer.toString('hex'), 16)
+      );
 
       const dataBuffer = Buffer.from(card, 'utf-8');
       const encryptedBuffer = forge.util.encode64(
         publicKey.encrypt(dataBuffer.toString('binary'), 'RSA-OAEP', {
           md: forge.md.sha256.create(),
         })
-        );
+      );
       return encryptedBuffer;
     }
+
     const jwt = JSON.stringify({
       "kty": "RSA",
       "use": "enc",
@@ -118,9 +118,10 @@ app.post('/cybersourceFlexV1', async function (req, res) {
       "n": n,
       "e": "AQAB"
     });
-    const signature = await importKey(jwt, cardNumber);
+
+    const encryptedCardNumber = await importKey(jwt, cardNumber);
     res.json({
-      'cardNumber': cardNumber,
+      'cardNumber': encryptedCardNumber,
       'Encrypted By': '@RailgunMisaka'
     });
   } catch (error) {
